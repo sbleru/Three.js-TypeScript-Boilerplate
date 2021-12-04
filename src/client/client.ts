@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 const scene = new THREE.Scene()
 
-/** 
+/**
  * Prepare camera.
  */
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -44,13 +44,40 @@ function onWindowResize() {
 }
 
 /**
+ * Create animation from animation clip.
+ */
+const duration = 4
+const clipJSON = {
+    duration: duration,
+    tracks: [
+        {
+            name: '.rotation[x]',
+            type: 'number',
+            times: [0, duration],
+            values: [0, 2 * Math.PI],
+            interpolation: THREE.InterpolateLinear,
+        },
+        {
+            name: '.rotation[y]',
+            type: 'number',
+            times: [0, duration],
+            values: [0, 2 * Math.PI],
+            interpolation: THREE.InterpolateLinear,
+        },
+    ],
+}
+const clip = THREE.AnimationClip.parse(clipJSON)
+const mixer = new THREE.AnimationMixer(cube)
+const action = mixer.clipAction(clip)
+action.play()
+
+/**
  * Animate and render.
  */
 function animate() {
     requestAnimationFrame(animate)
 
-    cube.rotation.x += 0.01
-    cube.rotation.y += 0.01
+    mixer.update(0.01)
 
     controls.update()
 
