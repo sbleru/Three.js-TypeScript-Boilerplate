@@ -70,6 +70,7 @@ const clip = THREE.AnimationClip.parse(clipJSON)
 const mixer = new THREE.AnimationMixer(cube)
 const action = mixer.clipAction(clip)
 action.play()
+const clock = new THREE.Clock();
 
 /**
  * Animate and render.
@@ -77,7 +78,8 @@ action.play()
 function animate() {
     requestAnimationFrame(animate)
 
-    mixer.update(0.01)
+    const delta = clock.getDelta();
+    mixer.update(delta)
 
     controls.update()
 
