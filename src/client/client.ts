@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
 
 const scene = new THREE.Scene()
 
@@ -8,8 +9,10 @@ const loader = new GLTFLoader()
 const flamingo = await loader.loadAsync('./assets/Flamingo.glb')
 
 function setupModel(data: GLTF) {
+    console.info(data)
     const model = data.scene.children[0]
     const clip = data.animations[0]
+    console.info(clip)
     const mixer = new THREE.AnimationMixer(model)
     const action = mixer.clipAction(clip)
     action.play()
@@ -105,6 +108,8 @@ const action = mixer.clipAction(clip)
 action.play()
 const clock = new THREE.Clock()
 
+const exporter = new GLTFExporter();
+
 /**
  * Animate and render.
  */
@@ -115,6 +120,25 @@ function animate() {
     mixer.update(delta)
     mixerFlamingo.update(delta);
     controls.update()
+    // console.info(Mflamingo);
+
+    exporter.parse(
+        Mflamingo,
+        (gltf) => {
+            // このgltfデータをサーバー経由で送ってレンダリングを行えれば良さそう
+            // ただし、gltfのフルデータになるので、本当はアニメーションデータだけ送りたい
+            // そうしないと、レンダリング側でgltfのnewを繰り返すことになる。それでアニメーションってできるのか？
+            // Animation System使わないことになるけど。
+            // modelの位置からAnimationClipのkeyframetrackを生成できれば良さそう
+            // meshes.wheightsの値だけが変わっていってそう
+            // 
+            // console.info(gltf);
+        },
+        {
+            // binary: true,
+            // animations: [clipFlamingo]
+        }
+    )
 
     render()
 }
