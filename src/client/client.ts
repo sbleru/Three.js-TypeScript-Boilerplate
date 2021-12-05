@@ -1,13 +1,46 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const scene = new THREE.Scene()
+
+const loader = new GLTFLoader()
+const flamingo = await loader.loadAsync('./assets/Flamingo.glb')
+
+function setupModel(data: GLTF) {
+    const model = data.scene.children[0]
+    const clip = data.animations[0]
+    const mixer = new THREE.AnimationMixer(model)
+    const action = mixer.clipAction(clip)
+    action.play()
+    ;(
+        model as THREE.Object3D<THREE.Event> & {
+            tick: (delta: any) => THREE.AnimationMixer
+        }
+    ).tick = (delta) => mixer.update(delta)
+    return model
+}
+const Mflamingo = setupModel(flamingo);
+scene.add(Mflamingo)
+const clipFlamingo = flamingo.animations[0]
+const mixerFlamingo = new THREE.AnimationMixer(Mflamingo)
+const actionFlamingo = mixerFlamingo.clipAction(clipFlamingo)
+actionFlamingo.play();
 
 /**
  * Prepare camera.
  */
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 camera.position.z = 2
+
+/**
+ * Add light.
+ */
+const ambientLight = new THREE.AmbientLight(0x444444);
+scene.add(ambientLight);
+const directionalLight = new THREE.DirectionalLight(0xaaaaaa, 0.9);
+directionalLight.position.set(0, 100, 40);
+scene.add(directionalLight);
 
 /**
  * Prepare render element.
@@ -70,7 +103,7 @@ const clip = THREE.AnimationClip.parse(clipJSON)
 const mixer = new THREE.AnimationMixer(cube)
 const action = mixer.clipAction(clip)
 action.play()
-const clock = new THREE.Clock();
+const clock = new THREE.Clock()
 
 /**
  * Animate and render.
@@ -78,9 +111,9 @@ const clock = new THREE.Clock();
 function animate() {
     requestAnimationFrame(animate)
 
-    const delta = clock.getDelta();
+    const delta = clock.getDelta()
     mixer.update(delta)
-
+    mixerFlamingo.update(delta);
     controls.update()
 
     render()
